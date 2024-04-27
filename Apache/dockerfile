@@ -1,0 +1,35 @@
+# Use the official httpd image as the base image
+FROM httpd:2.4
+
+# Copy custom Apache configuration file into the container
+COPY Apache/customApacheConf.conf /usr/local/apache2/conf/httpd.conf
+
+# Copy HTML files into the container
+COPY front-end/ /usr/local/apache2/htdocs
+
+# Update the package lists and install sudo
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# Create a new user with minimal privileges
+RUN useradd -ms /bin/bash limited_user
+
+# Grant limited_user permission to execute httpd binary
+RUN usermod -aG www-data limited_user
+
+# Change ownership of Apache directories to limited_user
+RUN chown -R limited_user:www-data /usr/local/apache2
+
+# Change permissions to Apache configuration file
+RUN chmod 644 /usr/local/apache2/conf/httpd.conf
+
+# Disable root user
+RUN usermod -p '!' root
+
+# Switch to limited_user
+USER limited_user
+
+# Expose port 80 to allow external connections
+EXPOSE 80

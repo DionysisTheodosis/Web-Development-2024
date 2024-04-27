@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  apache:
+    build:
+      context: .
+      dockerfile: Apache/dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ./Apache/customApacheConf.conf:/usr/local/apache2/conf/httpd.conf
+      - ./front-end:/usr/local/apache2/htdocs/
