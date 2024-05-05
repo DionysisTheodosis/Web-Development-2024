@@ -5,10 +5,27 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
+    open-in-view: true
+  docker:
+    compose:
+      lifecycle-management: start_only
+
+  session:
+    redis:
+      namespace: spring:session
+      cleanup-cron: 0 * * * * *
+      configure-action: notify_keyspace_events
+      flush-mode: immediate
+      repository-type: indexed
+server:
+  servlet:
+    session:
+      timeout: 15m
+      cookie:
+        max-age: 60m

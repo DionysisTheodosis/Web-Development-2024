@@ -1,6 +1,11 @@
 package com.icsd.healthcare.doctor.repository;
 
+import com.icsd.healthcare.doctor.entity.Doctor;
+import com.icsd.healthcare.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface DoctorRepository /*extends JpaRepository<DoctorRepository,Integer>*/ {
+@Repository
+public interface DoctorRepository extends JpaRepository<Doctor,Integer> {
+    Doctor findByUser(User user);
 }

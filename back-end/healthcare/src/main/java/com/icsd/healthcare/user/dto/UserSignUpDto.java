@@ -1,11 +1,10 @@
 package com.icsd.healthcare.user.dto;
 
-import com.icsd.healthcare.user.model.UserRole;
-import jakarta.validation.Valid;
+import com.icsd.healthcare.user.entity.UserRole;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 
-
-
+@Builder
 public record UserSignUpDto(
         @NotBlank(message = "First name cannot be blank")
         @Pattern(regexp = "\\D*", message = "First name cannot contain digits")

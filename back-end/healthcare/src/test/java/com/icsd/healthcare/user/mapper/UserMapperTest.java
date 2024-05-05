@@ -1,8 +1,8 @@
 package com.icsd.healthcare.user.mapper;
 
 import com.icsd.healthcare.user.dto.UserSignUpDto;
-import com.icsd.healthcare.user.model.User;
-import com.icsd.healthcare.user.model.UserRole;
+import com.icsd.healthcare.user.entity.User;
+import com.icsd.healthcare.user.entity.UserRole;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,29 +47,25 @@ class UserMapperTest {
     }
 
     @Test
-    void  shouldMapUserThrowPersonalIDNotAcceptableLenght(){
+    void shouldMapUserThrowPersonalIDNotAcceptableLenght() {
         UserSignUpDto userSignUpDto = new UserSignUpDto(
                 "dionysis",
                 "theodosis",
                 "theo_187@hotmail.com",
-                "sdfs",
+                "sdfs", // Short personal ID
                 "AB123456789",
                 UserRole.DOCTOR
         );
 
         Set<ConstraintViolation<UserSignUpDto>> violations = validator.validate(userSignUpDto);
-        if (!violations.isEmpty()) {
-            for (ConstraintViolation<UserSignUpDto> violation : violations) {
-                assertThrows(RuntimeException.class, () -> {
-                    try {
-                        throw new RuntimeException("Validation error: " + violation.getMessage());
-                    }
-                    catch(RuntimeException ex){
-                            System.out.println(ex.getMessage());
-                        }
-                });
+       // assertTrue(violations.isEmpty(), "Expected validation errors");
 
-            }
+        for (ConstraintViolation<UserSignUpDto> violation : violations) {
+            String message = violation.getMessage();
+            // Assert that the message contains the expected error for personal ID length
+            assertTrue(message.contains("Personal ID length should be..."));
         }
     }
+
+    /*todo: 1 make new repo*/
 }

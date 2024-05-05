@@ -1,28 +1,27 @@
 package com.icsd.healthcare;
 
-import com.icsd.healthcare.patient.model.Patient;
+import com.icsd.healthcare.patient.entity.Patient;
 import com.icsd.healthcare.patient.repository.PatientRepository;
 import com.icsd.healthcare.user.dto.UserSignUpDto;
-import com.icsd.healthcare.user.mapper.UserMapper;
-import com.icsd.healthcare.user.model.User;
-import com.icsd.healthcare.user.model.UserRole;
+import com.icsd.healthcare.user.entity.User;
+import com.icsd.healthcare.user.entity.UserRole;
 import com.icsd.healthcare.user.repository.UserRepository;
 import jakarta.validation.*;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import java.util.List;
 import java.util.Set;
-
+@Configurable
 @SpringBootApplication
 public class App {
 
 	public static void main(String[] args) {
 		SpringApplication.run(App.class, args);
 	}
-
+/*
 	@Bean
 	public CommandLineRunner init(UserRepository userRepository, PatientRepository patientRepository) {
 		return args -> {
@@ -64,12 +63,12 @@ public class App {
 				System.out.println("Validation error: " + violation.getMessage());
 			}
 			System.out.println(userSignUpDto);
-			/*UserMapper userMapper = new UserMapper();
+			*//*UserMapper userMapper = new UserMapper();
 			User user3 = userMapper.toUser(userSignUpDto);
-			userRepository.save(user3);*/
+			userRepository.save(user3);*//*
 
 
 
 		};
-	}
+	}*/
 }

@@ -2,7 +2,7 @@ package com.icsd.healthcare.user.mapper;
 
 
 import com.icsd.healthcare.user.dto.UserSignUpDto;
-import com.icsd.healthcare.user.model.User;
+import com.icsd.healthcare.user.entity.User;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
 
