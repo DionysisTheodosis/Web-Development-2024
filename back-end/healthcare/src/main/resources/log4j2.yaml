@@ -1,0 +1,36 @@
+status: debug
+name: RollingFileLongConfig
+property:
+  basePath: "./logs"
+appender:
+  rolling:
+    type: RollingFile
+    name: fileLogger
+    fileName: "${basePath}/app.log"
+    filePattern: "${basePath}/app_%d{dd-MMMM-yyyy}.log.gz"
+    layout:
+      type: PatternLayout
+      pattern: "%d{dd-MMMM-yyyy HH:mm:ss.SSS} %level [%t] [%l] - %msg%n"
+    policies:
+      type: Policies
+      size:
+        type: SizeBasedTriggeringPolicy
+        size: 10MB
+      time:
+        type: TimeBasedTriggeringPolicy
+        interval: 1
+        modulate: true
+    strategy:
+      type: DefaultRolloverStrategy
+      delete:
+        type: Delete
+        basePath: "${basePath}"
+        maxDepth: 10
+        ifLastModified:
+          type: IfLastModified
+          age: 30d
+rootLogger:
+  level: info
+  appenderRef:
+    rolling:
+      ref: fileLogger
