@@ -1,3 +1,4 @@
+
 -- Πίνακας Χρήστης
 CREATE TABLE t_user (
     userID INT PRIMARY KEY AUTO_INCREMENT,
@@ -71,3 +72,6 @@ CREATE TABLE t_doctorAvailability (
     FOREIGN KEY (doctorID) REFERENCES t_doctor(doctorID) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (slotID) REFERENCES t_slot(slotID) ON DELETE CASCADE ON UPDATE CASCADE
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
+

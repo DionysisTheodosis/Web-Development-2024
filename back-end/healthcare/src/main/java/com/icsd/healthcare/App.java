@@ -1,19 +1,9 @@
 package com.icsd.healthcare;
 
-import com.icsd.healthcare.patient.entity.Patient;
-import com.icsd.healthcare.patient.repository.PatientRepository;
-import com.icsd.healthcare.user.dto.UserSignUpDto;
-import com.icsd.healthcare.user.entity.User;
-import com.icsd.healthcare.user.entity.UserRole;
-import com.icsd.healthcare.user.repository.UserRepository;
-import jakarta.validation.*;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 
-import java.util.Set;
 @Configurable
 @SpringBootApplication
 public class App {

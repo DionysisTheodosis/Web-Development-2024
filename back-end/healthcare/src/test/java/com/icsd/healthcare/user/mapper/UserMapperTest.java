@@ -1,8 +1,9 @@
 package com.icsd.healthcare.user.mapper;
 
-import com.icsd.healthcare.user.dto.UserSignUpDto;
-import com.icsd.healthcare.user.entity.User;
-import com.icsd.healthcare.user.entity.UserRole;
+import com.icsd.healthcare.user.UserMapper;
+import com.icsd.healthcare.user.UserSignUpDto;
+import com.icsd.healthcare.user.User;
+import com.icsd.healthcare.user.UserRole;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
