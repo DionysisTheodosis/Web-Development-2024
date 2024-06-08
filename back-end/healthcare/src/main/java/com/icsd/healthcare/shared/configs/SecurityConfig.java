@@ -1,83 +1,75 @@
 package com.icsd.healthcare.shared.configs;
 
-import com.icsd.healthcare.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
-import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
 
 @Configuration
-@RequiredArgsConstructor
 @EnableWebSecurity
-public class SecurityConfig {
+@RequiredArgsConstructor
+public class SecurityConfig{
 
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final UserAuthenticationProvider authenticationProvider;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.COOKIES));
+        SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
-        return http
-                .csrf(AbstractHttpConfigurer::disable)  // Consider enabling CSRF protection if applicable
-                .authorizeHttpRequests(
-                        auth -> {
-                            auth.requestMatchers("/login/**", "/register/**", "/", "/as","/signup/**","/valid/**","/perform_login").permitAll();
-                            auth.requestMatchers("/api/slot/**", "/sessionAttributes")
-                                    .hasAuthority("DOCTOR");
-                            auth.anyRequest().authenticated();
+        //csrf & cors
+        http.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults());
 
-                        }
-                )
-                .formLogin(login -> login
-                        .loginProcessingUrl("/perform_login") // Specify the URL for the login controller
-                        .loginPage("/login.html")
-                        .defaultSuccessUrl("/as", true)
-                        .failureUrl("/login.html?error=true")// Specify the URL of the custom login page
-                        .permitAll() // Allow unauthenticated access to the login page
-                )
-                .httpBasic(Customizer.withDefaults())
-                .userDetailsService(userDetailsServiceImpl)
-                .sessionManagement(session -> {
-                    session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-                })
-                .logout(logout -> logout
-                      /*  .addLogoutHandler(new HeaderWriterLogoutHandler(
-                                new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.COOKIES) // Clear cookies
+        //http request
+        http.authorizeHttpRequests(
+                request -> {
+                    request.requestMatchers("/login/**", "/register/**", "/", "/as", "/signup/**", "/valid/**", "/api/login","/user/roles").permitAll();
+                    request.requestMatchers("/patient/**","/name").hasAnyAuthority("PATIENT","DOCTOR");
+                    request.requestMatchers("/**").hasAuthority("DOCTOR");// Doctors have access to all other URLs
+                    request.anyRequest().authenticated(); // Require authentication for all other URLs
+                }
+        );
 
-                        ))*/
-                        .addLogoutHandler(clearSiteData)
-                )
-                .headers(headers ->
-                headers.xssProtection(
-                        xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK)
-                ))
-                .build();
+        //storing the session
+        http.securityContext(context -> context.securityContextRepository(securityContextRepository));
+
+        //session management
+        http.sessionManagement(session -> {
+                    session.maximumSessions(1).maxSessionsPreventsLogin(true);
+                    session.sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession);
+                    session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+                }
+        );
+
+        //clear cookie when logout
+        http.logout(logout -> {
+                    logout.logoutUrl("/logout");
+                    logout.addLogoutHandler(
+                            new HeaderWriterLogoutHandler(
+                                    new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.COOKIES)
+                            )
+                    );
+                    logout.deleteCookies("SESSION");
+                    logout.logoutSuccessUrl("/login.html");
+                }
+        );
+
+        //auth provider for connect DAO
+        http.authenticationProvider(authenticationProvider);
+
+        return http.build();
     }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
 
 
 }

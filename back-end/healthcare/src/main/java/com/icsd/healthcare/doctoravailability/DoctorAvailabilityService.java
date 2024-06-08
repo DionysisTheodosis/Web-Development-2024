@@ -31,7 +31,8 @@ public class DoctorAvailabilityService {
 
     private final DoctorService doctorService;
     private final SlotService slotService;
-    private DoctorAvailabilityRepository doctorAvailabilityRepository;
+    private final DoctorAvailabilityRepository doctorAvailabilityRepository;
+    private final SlotRepresentationExcelParser slotRepresentationExcelParser;
 
     public void saveDoctorAvailabilitySingle(HttpServletRequest request, DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
 
@@ -91,6 +92,7 @@ public class DoctorAvailabilityService {
 
     }
 
+    //todo: Να φτιάξω το csv
     private Set<SlotDto> parseCsv(MultipartFile file) throws IOException {
 
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
@@ -120,7 +122,8 @@ public class DoctorAvailabilityService {
 
     public Integer uploadSlotsAsExcel(HttpServletRequest request, MultipartFile file) {
         try {
-            Set<SlotDto> slotDtos = SlotRepresentationExcelParser.parseExcel(file).stream().map(csvLine -> {
+
+            Set<SlotDto> slotDtos = this.slotRepresentationExcelParser.excelParse(file).stream().map(csvLine -> {
                 SlotDto.SlotDtoBuilder slotBuilder = SlotDto.builder()
                         .slotDateTime(csvLine.getLocalDateTime());
 
