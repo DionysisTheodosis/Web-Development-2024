@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
@@ -34,19 +35,24 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)  // Consider enabling CSRF protection if applicable
                 .authorizeHttpRequests(
                         auth -> {
-                            auth.requestMatchers("/login/**", "/register/**", "/", "/as","/signup/**").permitAll();
+                            auth.requestMatchers("/login/**", "/register/**", "/", "/as","/signup/**","/valid/**","/perform_login").permitAll();
                             auth.requestMatchers("/api/slot/**", "/sessionAttributes")
                                     .hasAuthority("DOCTOR");
                             auth.anyRequest().authenticated();
 
                         }
                 )
-                .formLogin(Customizer.withDefaults())
+                .formLogin(login -> login
+                        .loginProcessingUrl("/perform_login") // Specify the URL for the login controller
+                        .loginPage("/login.html")
+                        .defaultSuccessUrl("/as", true)
+                        .failureUrl("/login.html?error=true")// Specify the URL of the custom login page
+                        .permitAll() // Allow unauthenticated access to the login page
+                )
                 .httpBasic(Customizer.withDefaults())
                 .userDetailsService(userDetailsServiceImpl)
                 .sessionManagement(session -> {
-                    session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-
+                    session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
                 })
                 .logout(logout -> logout
                       /*  .addLogoutHandler(new HeaderWriterLogoutHandler(
@@ -71,6 +77,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
 
 
 }
