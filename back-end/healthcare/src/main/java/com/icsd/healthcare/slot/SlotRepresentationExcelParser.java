@@ -2,7 +2,7 @@ package com.icsd.healthcare.slot;
 
 import com.icsd.healthcare.shared.utils.ExcelParser;
 import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,15 +13,16 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Component
 public class SlotRepresentationExcelParser {
+    private final ExcelParser excelParser;
 
-    public static Set<SlotCsvRepresentation> parseExcel(MultipartFile file) throws IOException {
-        return ExcelParser.parseExcel(file, SlotRepresentationExcelParser::mapRowToSlotDto);
+    public  Set<SlotCsvRepresentation> excelParse(MultipartFile file) throws IOException {
+        return this.excelParser.parseExcel(file, this::mapRowToSlotDto);
     }
 
-    private static SlotCsvRepresentation mapRowToSlotDto(Row row) {
+    private  SlotCsvRepresentation mapRowToSlotDto(Row row) {
         SlotCsvRepresentation.SlotCsvRepresentationBuilder  slotBuilder = SlotCsvRepresentation.builder();
 
         CellType cellType = row.getCell(0).getCellType();
