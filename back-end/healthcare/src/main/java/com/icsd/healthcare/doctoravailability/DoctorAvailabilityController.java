@@ -18,7 +18,6 @@ public class DoctorAvailabilityController {
     @PostMapping("/single-slot")
     public ResponseEntity<HttpStatus> saveDoctorAvailabilitySingle(
             HttpServletRequest request, @RequestBody @Valid DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
-
             this.service.saveDoctorAvailabilitySingle(request, doctorAvailabilitySingleDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
