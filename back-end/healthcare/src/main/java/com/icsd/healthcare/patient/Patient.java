@@ -1,16 +1,17 @@
 package com.icsd.healthcare.patient;
 
 
+import com.icsd.healthcare.medicalhistory.MedicalHistory;
+import com.icsd.healthcare.shared.validators.ValidAmka;
 import com.icsd.healthcare.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Data
+@ToString
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,18 +24,18 @@ public class Patient {
     @Column(name = "patientID")
     private Integer patientID;
 
-    @Column(name = "amka",length = 11,columnDefinition = "CHAR",nullable = false)
+    @ValidAmka
+    @Column(name = "amka", length = 11, columnDefinition = "CHAR", nullable = false)
     private String amka;
 
-    @Column(name = "registrationDate" , insertable = false, updatable = false,nullable = false)
-    private LocalDate registrationDate;
+    @Column(name = "registrationDate", insertable = false, updatable = false, nullable = false)
+    private LocalDateTime registrationDate;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "userID", referencedColumnName = "userID", nullable = false)
     private User user;
 
-    @PrePersist
-    protected void onCreate() {
-        registrationDate = LocalDate.now();
-    }
+    @ToString.Exclude
+    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true, mappedBy = "patient")
+    private MedicalHistory medicalHistory;
 }

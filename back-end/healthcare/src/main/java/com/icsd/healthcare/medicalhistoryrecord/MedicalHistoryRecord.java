@@ -3,15 +3,12 @@ package com.icsd.healthcare.medicalhistoryrecord;
 
 import com.icsd.healthcare.medicalhistory.MedicalHistory;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.FutureOrPresent;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
-
-@Data
+@ToString
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,12 +21,13 @@ public class MedicalHistoryRecord {
     @Column(name = "recordID")
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "historyID")
+    @ToString.Exclude
+    @ManyToOne(cascade = {CascadeType.PERSIST})
+    @JoinColumn(name = "historyID",referencedColumnName = "historyID")
     private MedicalHistory medicalHistory;
 
-    @FutureOrPresent
-    @Column(name = "creationDate", nullable = false)
+
+    @Column(name = "creationDate", nullable = false, insertable = false, updatable = false)
     private LocalDateTime creationDate;
 
     @Column(name = "identifiedIssues")

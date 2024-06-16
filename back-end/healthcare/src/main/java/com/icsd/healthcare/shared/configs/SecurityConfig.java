@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,11 +15,13 @@ import org.springframework.security.web.authentication.logout.HeaderWriterLogout
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig{
 
     private final UserAuthenticationProvider authenticationProvider;
@@ -27,24 +30,26 @@ public class SecurityConfig{
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
-
-        //csrf & cors
+        http.headers(headers ->
+                headers.xssProtection(
+                        xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK)
+                ).contentSecurityPolicy(
+                        cps -> cps.policyDirectives("script-src 'self'")
+                ));
         http.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults());
 
-        //http request
         http.authorizeHttpRequests(
                 request -> {
-                    request.requestMatchers("/login/**", "/register/**", "/", "/as", "/signup/**", "/valid/**", "/api/login","/user/roles").permitAll();
-                    request.requestMatchers("/patient/**","/name").hasAnyAuthority("PATIENT","DOCTOR");
-                    request.requestMatchers("/**").hasAuthority("DOCTOR");// Doctors have access to all other URLs
-                    request.anyRequest().authenticated(); // Require authentication for all other URLs
+                    request.requestMatchers( "/api/v1/auth/register/**", "/", "/signup/**", "/api/v1/auth/valid/doctor", "/api/v1/auth/login","/api/v1/auth/user/roles",
+                            "/v3/api-docs","/v3/api-docs/**","/swagger-ui.html","/swagger-ui/**","/api/v1/session-cookie").permitAll();
+                    request.requestMatchers("api/v1/medical-history-records/**","/api/v1/patient","/api/v1/auth/name","/api/v1/auth/logout","/slot").hasAnyAuthority("PATIENT","DOCTOR","SECRETARY");
+                    request.requestMatchers("/**").hasAuthority("DOCTOR");
+                    request.anyRequest().authenticated();
                 }
         );
 
-        //storing the session
         http.securityContext(context -> context.securityContextRepository(securityContextRepository));
 
-        //session management
         http.sessionManagement(session -> {
                     session.maximumSessions(1).maxSessionsPreventsLogin(true);
                     session.sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession);
@@ -52,9 +57,8 @@ public class SecurityConfig{
                 }
         );
 
-        //clear cookie when logout
         http.logout(logout -> {
-                    logout.logoutUrl("/logout");
+                    logout.logoutUrl("/api/v1/auth/logout");
                     logout.addLogoutHandler(
                             new HeaderWriterLogoutHandler(
                                     new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.COOKIES)
@@ -65,7 +69,6 @@ public class SecurityConfig{
                 }
         );
 
-        //auth provider for connect DAO
         http.authenticationProvider(authenticationProvider);
 
         return http.build();

@@ -1,5 +1,6 @@
 package com.icsd.healthcare.doctoravailability;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,17 +9,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/doctor-availability")
+@Tag(name = "Doctor-Availability")
 public class DoctorAvailabilityController {
 
     private final DoctorAvailabilityService service;
 
     @PostMapping("/single-slot")
     public ResponseEntity<HttpStatus> saveDoctorAvailabilitySingle(
-            HttpServletRequest request, @RequestBody @Valid DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
-            this.service.saveDoctorAvailabilitySingle(request, doctorAvailabilitySingleDto);
+            @RequestBody @Valid DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
+            this.service.saveDoctorAvailabilitySingle(doctorAvailabilitySingleDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
@@ -26,27 +31,28 @@ public class DoctorAvailabilityController {
 
     @PostMapping("/multiple-slots")
     public ResponseEntity<HttpStatus> saveDoctorAvailabilityMultiple(
-            HttpServletRequest request, @RequestBody @Valid DoctorAvailabilityMultipleDto doctorAvailabilityMultipleDto) {
+            @RequestBody @Valid DoctorAvailabilityMultipleDto doctorAvailabilityMultipleDto) {
 
-        this.service.saveDoctorAvailabilityMultiple(request, doctorAvailabilityMultipleDto);
+        this.service.saveDoctorAvailabilityMultiple(doctorAvailabilityMultipleDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
     }
 
     @PostMapping(value = "/csv/upload", consumes = {"multipart/form-data"})
-    ResponseEntity<Integer> uploadSlotsAsCsv(HttpServletRequest request,@RequestPart("file") MultipartFile file){
+    ResponseEntity<Integer> uploadSlotsAsCsv(@RequestPart("file") MultipartFile file){
 
-        return ResponseEntity.ok(this.service.uploadSlotsAsCsv(request,file));
+        return ResponseEntity.ok(this.service.uploadSlotsAsCsv(file));
 
     }
 
     @PostMapping(value = "/excel/upload", consumes = {"multipart/form-data"})
-    ResponseEntity<Integer> uploadSlotsAsExcel(HttpServletRequest request,@RequestPart("file") MultipartFile file){
+    ResponseEntity<Integer> uploadSlotsAsExcel(@RequestPart("file") MultipartFile file){
 
-        return ResponseEntity.ok(this.service.uploadSlotsAsExcel(request,file));
+        return ResponseEntity.ok(this.service.uploadSlotsAsExcel(file));
 
     }
+
 
 
 /*
@@ -58,7 +64,7 @@ public class DoctorAvailabilityController {
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) String date, // Optional filter
             @RequestParam(required = false) String type) // Optional filter
-    )throws Exception {
+    )throws exception {
         // Retrieve doctor availability with optional filters and pagination
         Page<DoctorAvailability> availabilityPage = doctorAvailabilityService.getAvailability(doctorId, page, size, date, type);
         return ResponseEntity.ok(availabilityPage);
@@ -82,7 +88,11 @@ public ResponseEntity<String> importSlots(@RequestParam("file") MultipartFile fi
                 .body("Failed to import slots: " + e.getMessage());
     }*/
 
+   /* @GetMapping("/")
+    public ResponseEntity<Optional<List<DoctorAvailability>>> getDoctorAvailability(HttpServletRequest request) {
 
+
+    }*/
 }
 
 

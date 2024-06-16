@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Builder
-public class SlotCsvRepresentation {
+public class SlotCSVRepresentation {
 
     @CsvDate(value = "yyyy-MM-dd'T'HH:mm:ss")
     @CsvBindByName(column = "DateTime")

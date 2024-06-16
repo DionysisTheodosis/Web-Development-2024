@@ -24,7 +24,6 @@ public class BeanConfig {
         return new BCryptPasswordEncoder();
     }
 
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -47,5 +46,4 @@ public class BeanConfig {
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
     }
-
 }

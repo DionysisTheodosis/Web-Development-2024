@@ -28,11 +28,11 @@ class UserMapperTest {
     @Test
     void shouldMapUserDtoToUser() {
         UserSignUpDto userSignUpDto = new UserSignUpDto(
-                "Dionysis",
-                "theodosis",
-                "theo_187@hotmailcom",
+                "MyName",
+                "MyLastName",
+                "something@hotmail.com",
                 "secretPass",
-                "11112",
+                "AZ111121",
                 UserRole.DOCTOR
         );
 
@@ -50,23 +50,21 @@ class UserMapperTest {
     @Test
     void shouldMapUserThrowPersonalIDNotAcceptableLenght() {
         UserSignUpDto userSignUpDto = new UserSignUpDto(
-                "dionysis",
-                "theodosis",
-                "theo_187@hotmail.com",
-                "sdfs", // Short personal ID
+                "MyName",
+                "MyLastName",
+                "something@hotmail.com",
+                "sdfs",
                 "AB123456789",
                 UserRole.DOCTOR
         );
 
         Set<ConstraintViolation<UserSignUpDto>> violations = validator.validate(userSignUpDto);
-       // assertTrue(violations.isEmpty(), "Expected validation errors");
+
 
         for (ConstraintViolation<UserSignUpDto> violation : violations) {
             String message = violation.getMessage();
-            // Assert that the message contains the expected error for personal ID length
             assertTrue(message.contains("Personal ID length should be..."));
         }
     }
 
-    /*todo: 1 make new repo*/
 }

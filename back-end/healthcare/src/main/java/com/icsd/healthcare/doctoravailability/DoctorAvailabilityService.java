@@ -2,14 +2,20 @@ package com.icsd.healthcare.doctoravailability;
 
 import com.icsd.healthcare.doctor.Doctor;
 import com.icsd.healthcare.doctor.DoctorService;
+import com.icsd.healthcare.patient.Patient;
+import com.icsd.healthcare.patient.PatientNotFoundException;
 import com.icsd.healthcare.shared.exceptionhandler.ErrorCode;
-import com.icsd.healthcare.slot.*;
+import com.icsd.healthcare.slot.Slot;
+import com.icsd.healthcare.slot.SlotDto;
+import com.icsd.healthcare.slot.SlotCSVRepresentation;
+import com.icsd.healthcare.slot.SlotService;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,12 +38,9 @@ public class DoctorAvailabilityService {
     private final DoctorService doctorService;
     private final SlotService slotService;
     private final DoctorAvailabilityRepository doctorAvailabilityRepository;
-    private final SlotRepresentationExcelParser slotRepresentationExcelParser;
 
-    public void saveDoctorAvailabilitySingle(HttpServletRequest request, DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
-
-        Doctor doctor = doctorService.findDoctorByEmail(request.getUserPrincipal().getName());
-
+    public void saveDoctorAvailabilitySingle(DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
+        Doctor doctor = doctorService.getAuthenticatedDoctor();
         Slot slot = slotService.saveSlot(doctorAvailabilitySingleDto.slotDto());
 
         if (Boolean.FALSE.equals(this.doctorAvailabilityRepository.existsByDoctorAndSlot_SlotDateTime(doctor, slot.getSlotDateTime()))) {
@@ -53,12 +56,13 @@ public class DoctorAvailabilityService {
     }
 
 
-    public void saveDoctorAvailabilityMultiple(HttpServletRequest request, DoctorAvailabilityMultipleDto doctorAvailabilityMultipleDto) {
+    public void saveDoctorAvailabilityMultiple( DoctorAvailabilityMultipleDto doctorAvailabilityMultipleDto) {
         Set<SlotDto> slots = doctorAvailabilityMultipleDto.slot();
-        saveDoctorAvailabilityMultipleUtil(request,slots);
+        saveDoctorAvailabilityMultipleUtil(slots);
     }
-    private void saveDoctorAvailabilityMultipleUtil(HttpServletRequest request, Set<SlotDto> slots){
-        Doctor doctor = doctorService.findDoctorByEmail(request.getUserPrincipal().getName());
+    private void saveDoctorAvailabilityMultipleUtil(Set<SlotDto> slots){
+
+        Doctor doctor = doctorService.getAuthenticatedDoctor();
         List<Slot> existingSlots = new ArrayList<>();
 
         slots.stream()
@@ -78,16 +82,16 @@ public class DoctorAvailabilityService {
             throw new DoctorAvailabilityAlreadyExistsException("Doctor Availability already exists for the slots: " + existingSlots);
         }
     }
-    public Integer uploadSlotsAsCsv(HttpServletRequest request,MultipartFile file) {
+    public Integer uploadSlotsAsCsv(MultipartFile file) {
         try {
 
             Set<SlotDto> slots = parseCsv(file);
-            saveDoctorAvailabilityMultipleUtil(request,slots);
+            saveDoctorAvailabilityMultipleUtil(slots);
 
             return slots.size();
 
         } catch (IOException e) {
-            throw new DoctorAvailabilityIOExcepetion();
+            throw new DoctorAvailabilityIOException();
         }
 
     }
@@ -96,9 +100,9 @@ public class DoctorAvailabilityService {
     private Set<SlotDto> parseCsv(MultipartFile file) throws IOException {
 
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            HeaderColumnNameMappingStrategy<SlotCsvRepresentation> strategy = new HeaderColumnNameMappingStrategy<>();
-            strategy.setType(SlotCsvRepresentation.class);
-            CsvToBean<SlotCsvRepresentation> csvToBean = new CsvToBeanBuilder<SlotCsvRepresentation>(reader)
+            HeaderColumnNameMappingStrategy<SlotCSVRepresentation> strategy = new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(SlotCSVRepresentation.class);
+            CsvToBean<SlotCSVRepresentation> csvToBean = new CsvToBeanBuilder<SlotCSVRepresentation>(reader)
                     .withMappingStrategy(strategy)
                     .withIgnoreEmptyLine(true)
                     .withIgnoreLeadingWhiteSpace(true)
@@ -120,24 +124,11 @@ public class DoctorAvailabilityService {
         }
     }
 
-    public Integer uploadSlotsAsExcel(HttpServletRequest request, MultipartFile file) {
-        try {
+    public Integer uploadSlotsAsExcel(MultipartFile file) {
+        return null;
+    }
 
-            Set<SlotDto> slotDtos = this.slotRepresentationExcelParser.excelParse(file).stream().map(csvLine -> {
-                SlotDto.SlotDtoBuilder slotBuilder = SlotDto.builder()
-                        .slotDateTime(csvLine.getLocalDateTime());
-
-                if (csvLine.getDuration() != null) {
-                    slotBuilder.duration(csvLine.getDuration());
-                }
-
-                return slotBuilder.build();
-            }).collect(Collectors.toSet());
-
-            saveDoctorAvailabilityMultipleUtil(request,slotDtos);
-            return slotDtos.size();
-        }catch (IOException ex){
-            throw new DoctorAvailabilityIOExcepetion();
-        }
+    public boolean checkDoctorAvailability(int doctorId){
+       return doctorAvailabilityRepository.existsByDoctor_DoctorID(doctorId);
     }
 }

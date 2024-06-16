@@ -1,5 +1,6 @@
 package com.icsd.healthcare.shared.utils;
 
+import com.icsd.healthcare.shared.exception.ParsingFileIOException;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
@@ -13,13 +14,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Component
 public class CsvParser {
 
-    public  <T> Set<T> parseCsv(MultipartFile file, Class<T> clazz) throws IOException {
+    public <T> List<T> parseCsv(MultipartFile file, Class<T> clazz) throws IOException {
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             HeaderColumnNameMappingStrategy<T> strategy = new HeaderColumnNameMappingStrategy<>();
             strategy.setType(clazz);
@@ -28,7 +30,8 @@ public class CsvParser {
                     .withIgnoreEmptyLine(true)
                     .withIgnoreLeadingWhiteSpace(true)
                     .build();
-            return new HashSet<>(csvToBean.parse());
+            return csvToBean.parse();
+
         }
     }
 }

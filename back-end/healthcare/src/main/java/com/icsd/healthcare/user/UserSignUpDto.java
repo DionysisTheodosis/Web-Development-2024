@@ -1,33 +1,33 @@
 package com.icsd.healthcare.user;
 
-import jakarta.validation.constraints.*;
+import com.icsd.healthcare.shared.validators.ValidName;
+import com.icsd.healthcare.shared.validators.ValidPatientRole;
+import com.icsd.healthcare.shared.validators.ValidPersonalID;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 @Builder
 public record UserSignUpDto(
-        @NotBlank(message = "First name cannot be blank")
-        @Pattern(regexp = "\\D*", message = "First name cannot contain digits")
+
+        @ValidName
         String firstName,
 
-        @NotBlank(message = "Last name cannot be blank")
-        @Pattern(regexp = "\\D*", message = "Last name cannot contain digits")
+        @ValidName
         String lastName,
 
-        @NotEmpty(message = "User role cannot be blank")
         @NotBlank(message = "Email cannot be blank")
         @Email(message = "Invalid email format")
         String email,
 
+        //@ValidPassword TODO TO UNCOMMENT THE VALIDPASSWORD ANNOTATION
         @NotBlank(message = "Password cannot be blank")
         String password,
 
-        @NotBlank(message = "Personal ID cannot be blank")
-        @Pattern(regexp = "[a-zA-Z]{2}\\d{9}", message = "Invalid personal ID format")
-        @Size(min = 11, max = 11, message = "Personal ID must be 11 characters long")
+        @ValidPersonalID
         String personalID,
 
-        //@NotEmpty(message = "User role cannot be blank")
-        @NotNull(message = "User role cannot be null")
+        @ValidPatientRole
         UserRole userRole
 ) {
 }

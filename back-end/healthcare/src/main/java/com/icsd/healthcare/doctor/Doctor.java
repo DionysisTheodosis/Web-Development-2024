@@ -23,7 +23,7 @@ public class Doctor {
     @Column(name = "specialty", nullable = false, length = 100)
     String specialty;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "userID", referencedColumnName = "userID", nullable = false)
     private User user;
 }

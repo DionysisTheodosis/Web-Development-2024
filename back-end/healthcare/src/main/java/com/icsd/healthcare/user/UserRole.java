@@ -1,7 +1,14 @@
 package com.icsd.healthcare.user;
 
-public enum UserRole {
+import org.springframework.security.core.GrantedAuthority;
+
+public enum UserRole implements GrantedAuthority {
     SECRETARY,
     DOCTOR,
-    PATIENT
+    PATIENT;
+
+    @Override
+    public String getAuthority() {
+        return this.name();
+    }
 }

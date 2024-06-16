@@ -1,8 +1,18 @@
 package com.icsd.healthcare;
 
+import com.icsd.healthcare.doctor.Doctor;
+import com.icsd.healthcare.doctor.DoctorRepository;
+import com.icsd.healthcare.patient.PatientRepository;
+import com.icsd.healthcare.patient.PatientService;
+import com.icsd.healthcare.user.User;
+import com.icsd.healthcare.user.UserRepository;
+import com.icsd.healthcare.user.UserRole;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configurable
 @SpringBootApplication
@@ -11,54 +21,24 @@ public class App {
 	public static void main(String[] args) {
 		SpringApplication.run(App.class, args);
 	}
-/*
-	@Bean
-	public CommandLineRunner init(UserRepository userRepository, PatientRepository patientRepository) {
-		return args -> {
-			// Perform the search for a user by username
-			String usernameToSearch = "dionysis";
-			String amkaToSearch = "18069702878";
-			User user = userRepository.findByFirstName(usernameToSearch);
-			Patient patient = patientRepository.findByAmka(amkaToSearch);
 
-
-			// Handle the result
-			if (user != null) {
-				System.out.println("user is "+ user);
-
-
-			} else {
-				System.out.println("User not found for username: " + usernameToSearch);
-
-			}
-
-			if(patient!= null){
-				System.out.println("patient is "+ patient);
-			}
-			else{
-				System.out.println("Patient not found for amka: " + amkaToSearch);
-			}
-			UserSignUpDto userSignUpDto = new UserSignUpDto(
-					"dionysis",
-					"theodosis",
-					"theo_187@hotmail.com",
-					"sdfs",
-					"AB123456789",
-					UserRole.DOCTOR
+	/*@Bean
+	public CommandLineRunner init(UserRepository userRepository, PasswordEncoder passwordEncoder, DoctorRepository doctorRepository) {
+		return args ->
+			doctorRepository.save(
+					Doctor.builder()
+							.specialty("Ορθοπεδικός")
+							.user(
+									User.builder()
+											.firstName("Nikos")
+											.lastName("Papadopoulos")
+											.email("nick@hotmail.com")
+											.password(passwordEncoder.encode("123"))
+											.userRole(UserRole.DOCTOR)
+											.personalID("AT123456")
+											.build()
+							).build()
 			);
-			ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-			Validator validator = factory.getValidator();
-			Set<ConstraintViolation<UserSignUpDto>> violations = validator.validate(userSignUpDto);
-			for (ConstraintViolation<UserSignUpDto> violation : violations) {
-				System.out.println("Validation error: " + violation.getMessage());
-			}
-			System.out.println(userSignUpDto);
-			*//*UserMapper userMapper = new UserMapper();
-			User user3 = userMapper.toUser(userSignUpDto);
-			userRepository.save(user3);*//*
 
-
-
-		};
 	}*/
 }

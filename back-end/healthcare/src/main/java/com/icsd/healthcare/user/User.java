@@ -45,6 +45,7 @@ public class User implements UserDetails {
     @Column(name = "userRole", nullable = false,columnDefinition = "enum('PATIENT','DOCTOR','secretary')",updatable = false)
     private UserRole userRole;
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(userRole.name()));

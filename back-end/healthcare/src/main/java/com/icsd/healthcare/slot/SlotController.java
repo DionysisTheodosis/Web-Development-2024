@@ -20,7 +20,6 @@ public class SlotController {
 
     private final SlotService slotService;
 
-    @CrossOrigin
     @GetMapping
     public ResponseEntity<List<SlotDto>> getAllSlots() {
         return ResponseEntity.ok(slotService.getAllSlots());

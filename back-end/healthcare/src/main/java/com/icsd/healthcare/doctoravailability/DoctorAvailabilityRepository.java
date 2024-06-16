@@ -13,4 +13,5 @@ public interface DoctorAvailabilityRepository extends JpaRepository<DoctorAvaila
 
     Optional<DoctorAvailability> findByDoctorAndSlot(Doctor doctor, Slot slot);
     Boolean existsByDoctorAndSlot_SlotDateTime(Doctor doctor, LocalDateTime localDateTime);
+    Boolean existsByDoctor_DoctorID(int doctorID);
 }

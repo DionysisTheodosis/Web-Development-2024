@@ -1,14 +1,15 @@
 package com.icsd.healthcare.medicalhistory;
 
 
+import com.icsd.healthcare.medicalhistoryrecord.MedicalHistoryRecord;
 import com.icsd.healthcare.patient.Patient;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import java.util.Set;
 
-@Data
+@ToString
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,8 +22,16 @@ public class MedicalHistory {
     @Column(name = "historyID")
     private Integer id;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "patientID")
     private Patient patient;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "medicalHistory",cascade = {CascadeType.PERSIST},orphanRemoval = true)
+    private Set<MedicalHistoryRecord> medicalHistoryRecords;
+
+
+
+
 
 }

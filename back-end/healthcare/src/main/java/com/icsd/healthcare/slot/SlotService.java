@@ -1,7 +1,8 @@
 package com.icsd.healthcare.slot;
 
-import lombok.*;
-import org.springframework.dao.DataAccessException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

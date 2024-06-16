@@ -1,4 +1,4 @@
 package com.icsd.healthcare.appointment;
 
-public class AppointmentServiceImpl {
+public class AppointmentSpecifications {
 }
