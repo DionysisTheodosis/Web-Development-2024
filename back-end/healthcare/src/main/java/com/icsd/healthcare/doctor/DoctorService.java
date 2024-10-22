@@ -1,7 +1,6 @@
 package com.icsd.healthcare.doctor;
 
 
-import com.icsd.healthcare.patient.Patient;
 import com.icsd.healthcare.patient.PatientNotFoundException;
 import com.icsd.healthcare.shared.exceptionhandler.ErrorCode;
 import lombok.RequiredArgsConstructor;

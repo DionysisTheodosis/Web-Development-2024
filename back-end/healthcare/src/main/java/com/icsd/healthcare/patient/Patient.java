@@ -36,6 +36,6 @@ public class Patient {
     private User user;
 
     @ToString.Exclude
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true, mappedBy = "patient")
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private MedicalHistory medicalHistory;
 }

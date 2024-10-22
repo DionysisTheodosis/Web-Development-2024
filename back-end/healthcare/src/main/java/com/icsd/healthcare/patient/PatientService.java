@@ -10,6 +10,8 @@ import com.icsd.healthcare.shared.exception.NoChangesDetectedException;
 import com.icsd.healthcare.shared.exception.ParsingFileIOException;
 import com.icsd.healthcare.shared.utils.CsvParser;
 import com.icsd.healthcare.shared.validators.GenericValidator;
+import com.icsd.healthcare.shared.validators.ValidCsvFileType;
+import com.icsd.healthcare.shared.validators.ValidExcelFileType;
 import com.icsd.healthcare.user.UserAlreadyExistsException;
 import com.icsd.healthcare.user.UserService;
 import com.poiji.bind.Poiji;
@@ -225,7 +227,7 @@ public class PatientService {
 
 
 
-    public String addPatientsByCsv(MultipartFile file) {
+    public String addPatientsByCsv(@ValidCsvFileType MultipartFile file) {
         try {
 
             List<PatientFileRepresentation> patientsFromFile = csvParser.parseCsv(file,PatientFileRepresentation.class);
@@ -233,7 +235,7 @@ public class PatientService {
             return processPatientFileRepresentations(patientsFromFile);
 
         } catch (IOException e) {
-            log.error("Error processing file", e);
+            log.error("Error processing file ", e);
             throw new ParsingFileIOException();
         }
 
@@ -248,8 +250,7 @@ public class PatientService {
     }
 
 
-    public String addPatientsByExcel(MultipartFile file) {
-        validateFileType(file);
+    public String addPatientsByExcel(@ValidExcelFileType MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) {
 
             List<PatientFileRepresentation> patientsFromFile = Poiji.fromExcel(inputStream, PoijiExcelType.XLSX,PatientFileRepresentation.class);
@@ -277,14 +278,6 @@ public class PatientService {
 
         return "Failed to save all given patients. Number of patients saved is: " + sumOfSavedPatients;
     }
-
-    private void validateFileType(MultipartFile file) {
-
-        if (file == null || !"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(file.getContentType())) {
-            throw new InvalidFileTypeException("Invalid file type, valid types are xlsx or xls");
-        }
-    }
-
 
     public void savePatient(NewPatientDto patientDto) {
         patientRepository.save(patientMapper.mapDtoToEntity(patientDto));
@@ -315,7 +308,7 @@ public class PatientService {
     public Set<MedicalHistoryRecord> getOwnMedicalHistoryRecords() {
 
         Patient patient = getAuthenticatedPatient();
-        log.warn("OOOOOOO PA5IENT{}", patient.toString());
+        log.warn("PATIENT{}", patient.toString());
         MedicalHistory medicalHistory = patient.getMedicalHistory();
 
         if (medicalHistory == null) {

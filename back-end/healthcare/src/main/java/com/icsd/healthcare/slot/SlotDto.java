@@ -17,6 +17,7 @@ public record SlotDto(
         @FutureOrPresent
         @JsonProperty("slotDateTime")
         LocalDateTime slotDateTime,
+
         @JsonProperty("duration")
         Integer duration
 ) {

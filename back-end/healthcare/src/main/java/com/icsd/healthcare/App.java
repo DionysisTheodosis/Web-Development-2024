@@ -27,15 +27,15 @@ public class App {
 		return args ->
 			doctorRepository.save(
 					Doctor.builder()
-							.specialty("Ορθοπεδικός")
+							.specialty("Παιδίατρος")
 							.user(
 									User.builder()
-											.firstName("Nikos")
-											.lastName("Papadopoulos")
-											.email("nick@hotmail.com")
-											.password(passwordEncoder.encode("123"))
+											.firstName("Γιώργος")
+											.lastName("Στεφανόπουλος")
+											.email("stef@hotmail.com")
+											.password(passwordEncoder.encode("111"))
 											.userRole(UserRole.DOCTOR)
-											.personalID("AT123456")
+											.personalID("AT999456")
 											.build()
 							).build()
 			);

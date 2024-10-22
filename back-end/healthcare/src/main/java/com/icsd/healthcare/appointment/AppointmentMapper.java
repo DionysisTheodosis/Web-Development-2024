@@ -1,11 +1,9 @@
 package com.icsd.healthcare.appointment;
 
-import com.icsd.healthcare.App;
 import com.icsd.healthcare.doctor.Doctor;
 import com.icsd.healthcare.doctor.DoctorService;
 import com.icsd.healthcare.patient.Patient;
 import com.icsd.healthcare.patient.PatientService;
-import com.icsd.healthcare.shared.mapper.Mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

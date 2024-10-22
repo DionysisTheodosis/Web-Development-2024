@@ -2,133 +2,88 @@ package com.icsd.healthcare.doctoravailability;
 
 import com.icsd.healthcare.doctor.Doctor;
 import com.icsd.healthcare.doctor.DoctorService;
-import com.icsd.healthcare.patient.Patient;
-import com.icsd.healthcare.patient.PatientNotFoundException;
 import com.icsd.healthcare.shared.exceptionhandler.ErrorCode;
-import com.icsd.healthcare.slot.Slot;
-import com.icsd.healthcare.slot.SlotDto;
-import com.icsd.healthcare.slot.SlotCSVRepresentation;
-import com.icsd.healthcare.slot.SlotService;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.HeaderColumnNameMappingStrategy;
-import jakarta.servlet.http.HttpServletRequest;
+import com.icsd.healthcare.slot.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Builder
 @AllArgsConstructor
 @Service
+@Slf4j
 public class DoctorAvailabilityService {
 
     private final DoctorService doctorService;
     private final SlotService slotService;
     private final DoctorAvailabilityRepository doctorAvailabilityRepository;
+    private final SlotMapper slotMapper;
+    private final SlotMapperImpl slotMapperImpl;
+    private final SlotRepository slotRepository;
+
 
     public void saveDoctorAvailabilitySingle(DoctorAvailabilitySingleDto doctorAvailabilitySingleDto) {
-        Doctor doctor = doctorService.getAuthenticatedDoctor();
-        Slot slot = slotService.saveSlot(doctorAvailabilitySingleDto.slotDto());
 
-        if (Boolean.FALSE.equals(this.doctorAvailabilityRepository.existsByDoctorAndSlot_SlotDateTime(doctor, slot.getSlotDateTime()))) {
-            this.doctorAvailabilityRepository.save(DoctorAvailability
-                    .builder()
-                    .doctor(doctor)
+        Slot slot = slotMapper.mapDtoToEntity(doctorAvailabilitySingleDto.slotDto());
+
+        List<Slot> slots = getSlotsFromDoctorAvailability(signInDoctor().getDoctorID());
+        if(slots==null || slots.isEmpty()){
+
+        }
+        if (slots == null || slots.isEmpty() || !slotService.isSlotExistsOrOverlaps(slot, slots)) {
+            DoctorAvailability doctorAvailability = DoctorAvailability.builder()
+                    .doctor(signInDoctor())
                     .slot(slot)
-                    .build()
-            );
+                    .build();
+
+            // Save the DoctorAvailability entity
+            doctorAvailabilityRepository.save(doctorAvailability);
         } else {
             throw new DoctorAvailabilityAlreadyExistsException(ErrorCode.ERROR_DOCTOR_AVAILABILITY_ALREADY_EXISTS);
         }
     }
 
-
-    public void saveDoctorAvailabilityMultiple( DoctorAvailabilityMultipleDto doctorAvailabilityMultipleDto) {
-        Set<SlotDto> slots = doctorAvailabilityMultipleDto.slot();
-        saveDoctorAvailabilityMultipleUtil(slots);
-    }
-    private void saveDoctorAvailabilityMultipleUtil(Set<SlotDto> slots){
-
-        Doctor doctor = doctorService.getAuthenticatedDoctor();
-        List<Slot> existingSlots = new ArrayList<>();
-
-        slots.stream()
-                .map(slotDto -> {
-                    Slot slot = slotService.saveSlot(slotDto);
-                    if (Boolean.FALSE.equals(this.doctorAvailabilityRepository.existsByDoctorAndSlot_SlotDateTime(doctor, slot.getSlotDateTime()))) {
-                        return DoctorAvailability.builder().doctor(doctor).slot(slot).build();
-                    } else {
-                        existingSlots.add(slot);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .forEach(doctorAvailabilityRepository::save);
-
-        if (!existingSlots.isEmpty()) {
-            throw new DoctorAvailabilityAlreadyExistsException("Doctor Availability already exists for the slots: " + existingSlots);
-        }
-    }
-    public Integer uploadSlotsAsCsv(MultipartFile file) {
-        try {
-
-            Set<SlotDto> slots = parseCsv(file);
-            saveDoctorAvailabilityMultipleUtil(slots);
-
-            return slots.size();
-
-        } catch (IOException e) {
-            throw new DoctorAvailabilityIOException();
-        }
+    public void uploadSlotsAsCsv(MultipartFile file) {
+            Set<SlotDto> slotDtos = slotService.correctSlotsFromCsv(file,getSlotsFromDoctorAvailability(signInDoctor().getDoctorID()));
+            List<Slot> slots = slotDtos.stream()
+                .map(slotMapperImpl::mapDtoToEntity)
+                .toList();
+            saveDoctorAvailabilitySlots(slots, signInDoctor());
 
     }
 
-    //todo: Να φτιάξω το csv
-    private Set<SlotDto> parseCsv(MultipartFile file) throws IOException {
+    private void saveDoctorAvailabilitySlots(List<Slot> slots,Doctor doctor) {
 
-        try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            HeaderColumnNameMappingStrategy<SlotCSVRepresentation> strategy = new HeaderColumnNameMappingStrategy<>();
-            strategy.setType(SlotCSVRepresentation.class);
-            CsvToBean<SlotCSVRepresentation> csvToBean = new CsvToBeanBuilder<SlotCSVRepresentation>(reader)
-                    .withMappingStrategy(strategy)
-                    .withIgnoreEmptyLine(true)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-            return csvToBean.parse()
-                    .stream()
-                    .map(csvLine -> {
-                        SlotDto.SlotDtoBuilder slotBuilder = SlotDto.builder()
-                                .slotDateTime(csvLine.getLocalDateTime());
+        List<DoctorAvailability> doctorAvailabilities = slots.stream()
+                .map(slot -> DoctorAvailability.builder()
+                        .doctor(doctor)
+                        .slot(slotService.saveSlot(slot))
+                        .build())
+                .toList();
 
-                        if (csvLine.getDuration() != null) {
-                            slotBuilder.duration(csvLine.getDuration());
-                        }
+        doctorAvailabilityRepository.saveAll(doctorAvailabilities);
+    }
 
-                        return slotBuilder.build();
-                    })
-                    .collect(Collectors.toSet());
+    private Doctor signInDoctor(){
+        return doctorService.getAuthenticatedDoctor();
+    }
 
-        }
+    private List<Slot> getSlotsFromDoctorAvailability(Integer doctorId) {
+        List<DoctorAvailability> doctorAvailabilities = doctorAvailabilityRepository.findByDoctor_DoctorID(doctorId);
+
+        return doctorAvailabilities.stream()
+                .map(DoctorAvailability::getSlot)
+                .toList();
     }
 
     public Integer uploadSlotsAsExcel(MultipartFile file) {
         return null;
     }
 
-    public boolean checkDoctorAvailability(int doctorId){
-       return doctorAvailabilityRepository.existsByDoctor_DoctorID(doctorId);
-    }
+
 }

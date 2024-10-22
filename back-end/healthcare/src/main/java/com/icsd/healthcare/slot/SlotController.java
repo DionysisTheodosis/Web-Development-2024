@@ -35,12 +35,6 @@ public class SlotController {
         return ResponseEntity.accepted().body(slotService.findAllByPage(pageable));
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<HttpStatus> saveSlot(@RequestBody @Valid SlotDto slotDto) {
-        slotService.saveSlot(slotDto);
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
     @DeleteMapping("")
     public ResponseEntity<HttpStatus> deleteSlotById(@RequestBody @Valid SlotDto slotDto) {
         slotService.deleteSlot(slotDto);

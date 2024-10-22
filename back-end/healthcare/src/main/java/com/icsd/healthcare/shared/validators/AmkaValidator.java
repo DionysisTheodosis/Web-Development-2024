@@ -18,3 +18,4 @@ public class AmkaValidator implements ConstraintValidator<ValidAmka, String> {
         return value != null && value.matches("\\d{11}");
     }
 }
+

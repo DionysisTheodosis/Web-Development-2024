@@ -1,12 +1,16 @@
 package com.icsd.healthcare.patient;
 
+import com.icsd.healthcare.medicalhistory.MedicalHistory;
+import com.icsd.healthcare.medicalhistory.MedicalHistoryNotFoundException;
 import com.icsd.healthcare.medicalhistory.MedicalHistoryService;
 import com.icsd.healthcare.user.User;
 import com.icsd.healthcare.user.UserRole;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class PatientMapper {
@@ -31,15 +35,20 @@ public class PatientMapper {
     }
 
     public PatientInfoDto mapEntityToPatientInfoDto(Patient entity) {
-        int medicalHistoryId;
-        if(entity.getMedicalHistory()==null){
-            medicalHistoryId =  medicalHistoryService.getMedicalHistoryID(entity.getPatientID());
+        MedicalHistory medicalHistory = entity.getMedicalHistory();
+        Integer medicalHistoryId=null;
 
+        if (medicalHistory != null) {
+            medicalHistoryId=medicalHistory.getId();
         }
         else{
-            medicalHistoryId = entity.getMedicalHistory().getId();
+            try {
+                medicalHistoryId = medicalHistoryService.getMedicalHistoryID(entity.getPatientID());
+            }
+            catch(MedicalHistoryNotFoundException ex){
+                log.info("Medical History Not Found");
+            }
         }
-
         return PatientInfoDto.builder()
                 .patientID(entity.getPatientID())
                 .firstName(entity.getUser().getFirstName())
@@ -50,8 +59,6 @@ public class PatientMapper {
                 .registrationDate(entity.getRegistrationDate())
                 .medicalHistoryID(medicalHistoryId)
                 .build();
-
-
 
     }
 

@@ -1,5 +1,7 @@
 package com.icsd.healthcare.slot;
 
+import com.icsd.healthcare.patient.NewPatientDto;
+import com.icsd.healthcare.patient.PatientFileRepresentation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,4 +32,11 @@ public class SlotMapperImpl implements SlotMapper{
                   build();
     }
 
+    public SlotDto mapSlotFileRepresentationToSlotDto(SlotFileRepresentation slot) {
+
+        return SlotDto.builder()
+                .slotDateTime(slot.getLocalDateTime())
+                .duration(slot.getDuration())
+                .build();
+    }
 }
