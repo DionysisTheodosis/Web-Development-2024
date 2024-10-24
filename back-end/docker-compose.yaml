@@ -1,8 +1,8 @@
-version: '3.8'
-
+version: "3.7"
 services:
   mysql:
-    image: my_mysql_image:v1
+    image: mysql:8.0.36-debian
+    container_name: mysql_8.0.36-debian
     restart: always                       # always restart
     environment:
       MYSQL_DATABASE: 'health-care'              # name of database
@@ -13,3 +13,7 @@ services:
       - '3306:3306'                       # host port 3306 is mapper to docker port 3306
     expose:
       - '3306'
+    volumes:
+      - mysql-db:/var/lib/mysql
+volumes:
+        mysql-db:

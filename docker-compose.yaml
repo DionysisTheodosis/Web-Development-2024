@@ -7,6 +7,8 @@ services:
       dockerfile: Apache/dockerfile
     ports:
       - 80:80
+    environment:
+      - TOMCAT_HOST=192.168.1.2
     volumes:
       - ./Apache/customApacheConf.conf:/usr/local/apache2/conf/httpd.conf
       - ./front-end:/usr/local/apache2/htdocs/
