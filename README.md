@@ -77,8 +77,3 @@ This project is licensed under the **MIT License**.
 
 ---
 
-## ✉️ **Contact**
-For any issues or suggestions, contact:  
-📧 your-email@example.com  
-🔗 [GitHub Issues](https://github.com/yourusername/medcare/issues)  
-
