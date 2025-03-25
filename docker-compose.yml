@@ -1,0 +1,82 @@
+version: '3.7'
+
+services:
+  # MySQL Service
+  mysql:
+    image: mysql:8.0.36-debian
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: health-care
+      MYSQL_USER: sample
+      MYSQL_PASSWORD: password
+    volumes:
+      - back-end_mysql-db:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - mysql_network  # MySQL only connected to the MySQL network
+
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - redis_network  # Redis only connected to the Redis network
+
+  # Backend Service (Spring Boot)
+  backend:
+    build:
+      context: ./backend
+    container_name: backend-container
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/health-care
+      SPRING_DATASOURCE_USERNAME: sample
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_REDIS_HOST: redis
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    restart: always
+    networks:
+      - backend_network  # Backend connected to backend network
+      - mysql_network     # Backend can access MySQL
+      - redis_network     # Backend can access Redis
+
+  # Frontend Service (React)
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile # Refers to the Dockerfile that builds the app
+    container_name: frontend-container
+    ports:
+      - "80:80"
+    networks:
+      - frontend_network
+      - backend_network
+    depends_on:
+      - backend
+    restart: always
+    volumes:
+      - ./frontend/medcare/dist:/usr/share/nginx/html:ro
+      - ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+   back-end_mysql-db:
+    external: true
+
+networks:
+  mysql_network:  # Network for MySQL
+    driver: bridge
+  redis_network:  # Network for Redis
+    driver: bridge
+  backend_network:  # Network for Backend
+    driver: bridge
+  frontend_network:  # Network for Frontend
+    driver: bridge

@@ -1,0 +1,23 @@
+/* Make the entire page take up full height */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+}
