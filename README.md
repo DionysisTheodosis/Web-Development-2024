@@ -9,7 +9,7 @@ MedCare is a full-stack web application designed to facilitate doctor appointmen
 ✅ Appointment scheduling system  
 ✅ Role-based access control  
 ✅ Secure backend with session-based authentication  
-✅ Fully responsive UI  
+❌ Fully responsive UI , not yet implemented the ui its just the RestApi full functional at the momment, and some parts of ui   
 
 ---
 
